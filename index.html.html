@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Glowing Stopwatch with Laps</title>
+<style>
+  body {
+    text-align: center;
+    font-family: Arial, sans-serif;
+    margin-top: 30px;
+    background: #000;
+    color: white;
+  }
+  #display {
+    font-size: 60px;
+    margin-bottom: 20px;
+    font-weight: bold;
+    padding: 20px 40px;
+    border-radius: 12px;
+    text-shadow: 0 0 10px white, 0 0 20px white;
+    transition: all 0.3s ease;
+  }
+  button {
+    font-size: 18px;
+    margin: 5px;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    color: white;
+    transition: 0.3s;
+  }
+  #startBtn { background: #2ecc71; }
+  #pauseBtn { background: #f1c40f; color: black; }
+  #resetBtn { background: #e74c3c; }
+  #lapBtn { background: #3498db; }
+  button:disabled { opacity: 0.5; cursor: not-allowed; }
+  #laps {
+    margin-top: 20px;
+    max-height: 200px;
+    overflow-y: auto;
+    text-align: left;
+    width: 250px;
+    margin-left: auto;
+    margin-right: auto;
+    padding: 10px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 8px;
+  }
+  .lap {
+    padding: 5px;
+    border-bottom: 1px solid rgba(255,255,255,0.2);
+  }
+</style>
+</head>
+<body>
+
+<h1>Glowing Stopwatch with Laps</h1>
+<div id="display">00:00:00.00</div>
+<button id="startBtn">Start</button>
+<button id="pauseBtn" disabled>Pause</button>
+<button id="lapBtn" disabled>Lap</button>
+<button id="resetBtn" disabled>Reset</button>
+
+<div id="laps"></div>
+
+<script>
+let startTime = 0;
+let elapsed = 0;
+let timer = null;
+let lapCount = 0;
+
+function format(ms) {
+  const totalSeconds = Math.floor(ms / 1000);
+  const hours = String(Math.floor(totalSeconds / 3600)).padStart(2,'0');
+  const minutes = String(Math.floor((totalSeconds % 3600) / 60)).padStart(2,'0');
+  const seconds = String(totalSeconds % 60).padStart(2,'0');
+  const centis = String(Math.floor((ms % 1000) / 10)).padStart(2,'0');
+  return `${hours}:${minutes}:${seconds}.${centis}`;
+}
+
+function updateDisplay() {
+  const now = Date.now();
+  const time = elapsed + (now - startTime);
+  document.getElementById('display').textContent = format(time);
+
+  const display = document.getElementById('display');
+  if (time < 60000) {
+    display.style.background = "#2ecc71";
+    display.style.textShadow = "0 0 15px #2ecc71, 0 0 30px #2ecc71, 0 0 45px #27ae60";
+    display.style.color = "white";
+  } else if (time < 300000) {
+    display.style.background = "#f1c40f";
+    display.style.color = "black";
+    display.style.textShadow = "0 0 15px #f1c40f, 0 0 30px #f39c12, 0 0 45px #e67e22";
+  } else {
+    display.style.background = "#e74c3c";
+    display.style.color = "white";
+    display.style.textShadow = "0 0 15px #e74c3c, 0 0 30px #c0392b, 0 0 45px #ff1e1e";
+  }
+}
+
+document.getElementById('startBtn').onclick = function() {
+  startTime = Date.now();
+  timer = setInterval(updateDisplay, 10);
+  this.disabled = true;
+  document.getElementById('pauseBtn').disabled = false;
+  document.getElementById('lapBtn').disabled = false;
+  document.getElementById('resetBtn').disabled = false;
+};
+
+document.getElementById('pauseBtn').onclick = function() {
+  clearInterval(timer);
+  elapsed += Date.now() - startTime;
+  document.getElementById('startBtn').disabled = false;
+  this.disabled = true;
+  document.getElementById('lapBtn').disabled = true;
+};
+
+document.getElementById('lapBtn').onclick = function() {
+  lapCount++;
+  const currentTime = elapsed + (Date.now() - startTime);
+  const lapTime = format(currentTime);
+  const lapDiv = document.createElement('div');
+  lapDiv.classList.add('lap');
+  lapDiv.textContent = `Lap ${lapCount}: ${lapTime}`;
+  document.getElementById('laps').prepend(lapDiv);
+};
+
+document.getElementById('resetBtn').onclick = function() {
+  clearInterval(timer);
+  elapsed = 0;
+  lapCount = 0;
+  document.getElementById('display').textContent = '00:00:00.00';
+  document.getElementById('display').style.background = "transparent";
+  document.getElementById('display').style.textShadow = "0 0 10px white";
+  document.getElementById('laps').innerHTML = '';
+  document.getElementById('startBtn').disabled = false;
+  document.getElementById('pauseBtn').disabled = true;
+  document.getElementById('lapBtn').disabled = true;
+  this.disabled = true;
+};
+</script>
+
+</body>
+</html>
